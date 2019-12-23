@@ -62,9 +62,11 @@ def get_channel_messages(channel, from_date, to_date, retry=20):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', '-o', type=str, default='log.json')
+    parser.add_argument('--days', '-d', type=int, default=60)
     args = parser.parse_args()
 
     output_filename = args.output
+    days = args.days
     
     users = get_user_list()
     channels = get_channel_list()
@@ -75,7 +77,7 @@ if __name__ == '__main__':
     for channel in tqdm(channels):
         if channel['is_archived'] == False:
             messages[channel['id']] = get_channel_messages(channel,
-                                            from_date=int(time.mktime((today - timedelta(60)).timetuple())),
+                                            from_date=int(time.mktime((today - timedelta(days)).timetuple())),
                                             to_date=int(time.mktime(today.timetuple())))
     
     data = {'users': users,
