@@ -8,8 +8,8 @@ import util
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', '-i', type=str, default='log.json')
-    parser.add_argument('--model', '-m' type=str, default='model.vec')
-    parser.add_argument('--target', '-t' type=str, required=True)
+    parser.add_argument('--model', '-m', type=str, default='model.vec')
+    parser.add_argument('--target', '-t', type=str, required=True)
     args = parser.parse_args()
 
     input_filename = args.input
