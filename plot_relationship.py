@@ -9,7 +9,7 @@ import util
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', '-i', type=str, default='log.json')
-    parser.add_argument('--model', '-m' type=str, default='model.vec')
+    parser.add_argument('--model', '-m', type=str, default='model.vec')
     args = parser.parse_args()
 
     input_filename = args.input
@@ -29,6 +29,6 @@ if __name__ == '__main__':
     plt.figure(figsize=(16, 16))
     for r, n in zip(ret, name_list):
         plt.scatter(r[0], r[1], color='r')
-        plt.text(r[0]+0.3, r[1]+0.3, n, fontsize=9)
+        plt.text(r[0]+0.1, r[1]+0.1, n, fontsize=9)
     
     plt.show()

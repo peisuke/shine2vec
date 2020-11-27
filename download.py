@@ -11,52 +11,88 @@ from tqdm import tqdm
 SLACK_TOKEN = os.environ['SLACK_TOKEN']
 
 def get_user_list():
-    r = requests.get('https://slack.com/api/users.list',
-                     params={'token': SLACK_TOKEN})
-    return r.json()['members']
+    next_cursor = None
+    members = []
 
+    while True:
+        payload = {
+            'token': SLACK_TOKEN
+        }
+        if next_cursor:
+            payload['cursor'] = next_cursor
+        
+        r = requests.get('https://slack.com/api/users.list',
+                         params=payload)
+        r = r.json()
+        members.extend(r['members'])
+    
+        next_cursor = r['response_metadata']['next_cursor']
+        if len(next_cursor) == 0:
+            break
+
+    return members
 
 def get_channel_list():
-    r = requests.get('https://slack.com/api/channels.list',
-                     params={'token': SLACK_TOKEN})
-    return r.json()['channels']
+    next_cursor = None
+    channels = []
 
+    while True:
+        payload = {
+            'token': SLACK_TOKEN
+        }
+        if next_cursor:
+            payload['cursor'] = next_cursor
+        
+        r = requests.get('https://slack.com/api/conversations.list',
+                         params=payload)
+        r = r.json()
+        channels.extend(r['channels'])
+    
+        next_cursor = r['response_metadata']['next_cursor']
+        if len(next_cursor) == 0:
+            break
+
+    return channels
 
 def get_channel_messages(channel, from_date, to_date, retry=20):
     latest = to_date
     oldest = from_date
-    has_more = True
+    next_cursor = None
+
     messages = []
-    while(has_more):
+    retry_count = 10
+    
+    while True:
         payload={
             "token": SLACK_TOKEN,
             "channel": channel["id"],
             "latest": latest,
             "oldest": oldest
         }
-        for i in range(retry):
+        if next_cursor:
+            payload['cursor'] = next_cursor
+
+        r = {'ok': False}
+        for i in range(retry_count):
             try:
-                r = requests.get("https://slack.com/api/channels.history", params=payload)
-            except BaseError as e:
-                t, v, tb = sys.exc_info()
-                print(traceback.format_exception(t,v,tb))
-                print(traceback.format_tb(e.__traceback__))
-                
-            if r.status_code == 429:
-                sleep_time = int(r.headers["Retry-After"])
-                time.sleep(sleep_time)
-                continue
-            else:
-                break
-        else:
-            print('cannot load channel history')
-            print(payload)
-            continue
-        d = r.json()
-        messages += d['messages']
-        has_more =  'has_more' in d and d['has_more']
-        if has_more:
-            latest = int(float(d["messages"][-1]["ts"]))
+                r = requests.get("https://slack.com/api/conversations.history", 
+                                 params=payload)
+                r = r.json()
+                if r['ok'] == True:
+                    break
+            except requests.exceptions.RequestException as e:
+                pass
+        
+        if r['ok'] == False:
+            break
+        
+        messages.extend(r['messages'])
+            
+        if r['has_more'] == False:
+            break
+        else: 
+            next_cursor = r['response_metadata']['next_cursor']
+
     return messages
 
 if __name__ == '__main__':
