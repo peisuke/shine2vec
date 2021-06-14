@@ -23,7 +23,7 @@ if __name__ == '__main__':
     
     id2name, name2id = util.create_dict(data)
     name_list = util.create_name_list(model, id2name)
-    vec_list = util.create_vec_list(model, name_list, name2id)
+    name_list, vec_list = util.create_vec_list(model, name_list, name2id)
     
     menber_dict = np.array(vec_list).T
     

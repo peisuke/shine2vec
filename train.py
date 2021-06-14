@@ -37,6 +37,6 @@ if __name__ == '__main__':
                     if len(sentence) > 3:
                         sentence_list.append(sentence)
     
-    model = word2vec.Word2Vec(sentence_list, size=32, min_count=5, window=5, iter=300)
+    model = word2vec.Word2Vec(sentence_list, vector_size=32, min_count=5, window=5, epochs=300)
     
     model.save(model_filename)
